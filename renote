@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+
+import os
+
+ascii_art = r'''
+
+__________                      __
+\______   \ ____   ____   _____/  |_  ____
+ |       _// __ \ /    \ /  _ \   __\/ __ \
+ |    |   \  ___/|   |  (  <_> )  | \  ___/
+ |____|_  /\___  >___|  /\____/|__|  \___  >
+        \/     \/     \/                 \/
+
+
+'''
+
+print(ascii_art)
+print("=" * 60)
+print(" IP Manager running.".center(60))
+print(" Type 'add ip <IP>' to add an IP.".center(60))
+print(" Type 'rem ip <IP>' to remove one.".center(60))
+print(" Type 'list' to see all IPs.".center(60))
+print(" Type 'exit' to quit.".center(60))
+print("=" * 60)
+print()
+
+current_directory = os.getcwd()
+filename = os.path.join(current_directory, 'notes.txt')
+
+def add_ip(ip):
+    if not os.path.exists(filename):
+        with open(filename, "w") as file:
+            file.write("IPs:\n")
+
+    with open(filename, "r+") as file:
+        lines = file.readlines()
+        if ip in [line.strip() for line in lines]:
+            return
+        lines.insert(1, ip + "\n")
+        file.seek(0)
+        file.writelines(lines)
+
+def remove_ip(ip):
+    if not os.path.exists(filename):
+        return
+
+    with open(filename, "r") as file:
+        lines = file.readlines()
+
+    with open(filename, "w") as file:
+        found = False
+        for line in lines:
+            if line.strip() != ip:
+                file.write(line)
+            else:
+                found = True
+
+    if not found:
+        return
+
+def list_ips():
+    if not os.path.exists(filename):
+        with open(filename, "w") as file:
+            pass
+
+    with open(filename, "r") as file:
+        lines = file.readlines()
+
+    print("IPs:")
+    for line in lines[1:]:
+        print(line.strip())
+
+    print()
+
+def clear_ips():
+    if not os.path.exists(filename):
+        return
+
+    with open(filename, "w") as file:
+        file.write("IPs:\n")
+
+    print("All IP entries have been cleared.")
+
+    print()
+
+def main():
+    while True:
+        try:
+            command = input(">").strip()
+            if command.lower() == "exit":
+                break
+
+            parts = command.split()
+            if len(parts) < 2:
+                continue
+
+            print()
+
+            action, subcommand = parts[0], parts[1]
+
+            if len(parts) > 2:
+                ip = parts[2]
+
+            if action == "add" and subcommand == "ip":
+                add_ip(ip)
+            elif action == "rem" and subcommand == "ip":
+                remove_ip(ip)
+            elif action == "list" and subcommand == "ip":
+                list_ips()
+            elif action == "clear" and subcommand == "ip":
+                clear_ips()
+        except KeyboardInterrupt:
+            break
+
+if __name__ == "__main__":
+    main()
