@@ -36,7 +36,7 @@ Type 'exit' to quit
 current_directory = os.getcwd()
 json_path = os.path.join(current_directory, 'notes.json')
 
-notes_temp = '{ "ip":[], "user":[] }'
+notes_temp = '{ }'
 
 print(ascii_art)
 print(help)
@@ -107,9 +107,30 @@ def list_items(item_type):
 def clear_items(item_type):
     with open(json_path, "r") as json_file:
         items = json.load(json_file)
+    
 
-    if item_type not in items:
-        print(f"Notes do not contain any {item_type}'s")
+    if item_type == '-all':
+        print("Clearing all items!")
+        for item in items:
+            items[item] = []
+    else:
+        if item_type not in items:
+            print(f"Notes do not contain any {item_type}'s")
+            return
+        items[item_type] = []
+
+    json_items = json.dumps(items, indent=4)
+    with open(json_path, "w") as json_file:
+        json_file.write(json_items)
+
+    print(f"{item_type} notes cleared!")
+
+def new_itemType(item_type):
+    with open(json_path, "r") as json_file:
+        items = json.load(json_file)
+
+    if item_type in items:
+        print(f"Notes already contain {item_type}'s")
         return
 
     items[item_type] = []
@@ -117,8 +138,24 @@ def clear_items(item_type):
     json_items = json.dumps(items, indent=4)
     with open(json_path, "w") as json_file:
         json_file.write(json_items)
+    
+    print(f"New type created ({item_type})")
 
-    print(f"{item_type} notes cleared!")
+def del_itemType(item_type):
+    with open(json_path, "r") as json_file:
+        items = json.load(json_file)
+    
+    if item_type not in items:
+        print(f"Notes do not contain {item_type}'s")
+        return
+    
+    del items[item_type]
+
+    json_items = json.dumps(items, indent=4)
+    with open(json_path, "w") as json_file:
+        json_file.write(json_items)
+
+    print(f"Deleted {item_type}'s from notes")
 
 def main():
     while True:
@@ -138,20 +175,31 @@ def main():
 
             print()
 
-            action, item_type = parts[0].lower(), parts[1].lower()
+            action, subcommand = parts[0].lower(), parts[1].lower()
 
-            item = None
+            subcommand2 = None
             if len(parts) > 2:
-                item = parts[2]
+                subcommand2 = parts[2]
+
             
             if action == "add":
-                add_item(item_type, item)
+                add_item(subcommand, subcommand2)
             elif action == "rem":
-                rem_item(item_type, item)
+                rem_item(subcommand, subcommand2)
             elif action == "list":
-                list_items(item_type)
+                list_items(subcommand)
             elif action == "clear":
-                clear_items(item_type)
+                clear_items(subcommand)
+            elif action == "new":
+                if subcommand == "type":
+                    new_itemType(subcommand2)
+                else:
+                    print("Not a valid subcommand")
+            elif action == "del":
+                if subcommand == 'type':
+                    del_itemType(subcommand2)
+                else:
+                    print("Not a valid subcommand")
 
         except KeyboardInterrupt:
             break
