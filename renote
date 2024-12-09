@@ -166,7 +166,8 @@ def main():
                     print("New notebook created")
 
             command = input(">").strip()
-            if command.lower() is "exit":
+            
+            if command.lower() == "exit":
                 break
 
             parts = command.split()
